@@ -1,0 +1,22 @@
+sudo: required
+services:
+  -docker
+
+before_install: 
+  - docker build -t shubhamv/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run shubhamv/react-test npm test -- --cover
+
+after_success: 
+  - docker build -t shubham01/multi-client ./client
+  - docker build -t shubham01/multi-nginx ./nginx
+  - docker build -t shubham01/multi-server ./server
+  - docker build -t shubham01/multi-worker ./worker
+  # Login to the Docker cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images & push them to dockerhub
+  - docker push shubham01/multi-client
+  - docker push shubham01/multi-nginx
+  - docker push shubham01/multi-server
+  - docker push shubham01/multi-worker
