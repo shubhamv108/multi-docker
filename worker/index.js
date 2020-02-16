@@ -8,14 +8,20 @@ const redisClient = redis.createClient({
 });
 const subscriber = redisClient.duplicate();
 
+if (null == subscriber) {
+    console.log('could not crete subscriber redis');
+}
+
 function fib(index) {
     if (index < 2) return 1;
     return fib(index - 1) + fib(index - 2);
 }
 
 subscriber.on('message', (channel, message) => {
-    console.log('setting index fib in redis set values for index', message);
+    console.log('setting index fib in redis set values for index', message, "on channel " + channel);
     redisClient.hset('values', message, fib(parseInt(message)));
 });
 
 subscriber.subscribe('insert');
+
+console.log("Started worker")

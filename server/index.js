@@ -59,7 +59,13 @@ app.post('/values', async (req, res) => {
     }
 
     redisClient.hset('values', index, 'Nothing yet!')
-    redisPublisher.publish('insert', index)
+    console.log("Publishing " + index + " to redis insert chanel")
+    redisPublisher.publish('insert', index, (err, reply) => {
+        if (err) {
+            console.log("Error publishing to insert channel index: ", index);    
+        }
+        console.log("publish into insert channel ", index, " reply ", reply);
+    })
     pgClient.query('INSERT INTO values (number) VALUES($1)', [ index ])
     res.send({ working: true })
 })
